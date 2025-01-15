@@ -1,0 +1,9 @@
+.venv
+.venv1
+.ipynb_checkpoints
+book\ chapters
+data
+data_aristotle
+gutenberg_platos.ipynb
+.DS_Store
+.idea
