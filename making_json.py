@@ -123,5 +123,5 @@ all_text_dict_list.extend(test)
 json_object = json.dumps(all_text_dict_list, indent=4)
 #
 # # Writing to sample.json
-with open("sample.json", "w") as outfile:
+with open("aristotle.json", "w") as outfile:
     outfile.write(json_object)
