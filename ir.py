@@ -3,21 +3,70 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 import numpy as np
 
-with open('sample.json', 'r') as file:
-    data = json.load(file)
+def load_tfidf(corpus_json):
+    """
+    This function creates a data variable tfidf vectorizer, and tfidf matrix for a given json corpus.
+    It expects a json file with 'chapter_text' in each element.
 
-corpus = [item['chapter_text'] for item in data]
-vectorizer = TfidfVectorizer()
-X = vectorizer.fit_transform(corpus)
-vectorizer.get_feature_names_out()
-X = normalize(X, axis=1, norm="l1")
+    Takes as input:
+    :param corpus_json: location of json file with docs
+    And then outputs:
+    :return: the loaded corpus data (data), the vectorizer for the tfidf (vectorizer), and the tfidf matrix (X)
+    """
+    with open(corpus_json, 'r') as file:
+        data = json.load(file)
 
-query = ["Why is the womb warm?"]
-query_vector = vectorizer.transform(query)
-query_vector = normalize(query_vector, axis=1, norm="l1")
+    corpus = [item['chapter_text'] for item in data]
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(corpus)
+    vectorizer.get_feature_names_out()
+    X = normalize(X, axis=1, norm="l1")
+    return data, vectorizer, X
 
-# Now the multiplication
-res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+def ir_single_query_cos_sims(question,  corpus_json='aristotle.json'):
+    """
+    This function generates the cosine similarity values between the query and every doc in the corpus.
+    Its output is in the form of a list of dictionaries (which can be converted to a json).
 
-res_data = data[np.argmax(res)]
-print(res_data)
+    Takes as input:
+    :param question: the string of the current question
+    :param corpus_json: location of json file with docs
+    And then outputs:
+    :return: the json with the element 'cos_sim_to_query' appended to each doc's item
+    """
+    data, vectorizer, X = load_tfidf(corpus_json)
+    query = [question]
+    query_vector = vectorizer.transform(query)
+    query_vector = normalize(query_vector, axis=1, norm="l1")
+
+    # Now the multiplication
+    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+    res = list(np.squeeze(res))
+    for i in range(len(data)):
+        data[i]['cos_sim_to_query'] = res[i]
+    return data
+
+def ir_single_query_top_doc(question,  corpus_json='aristotle.json'):
+    """
+    This function pulls the doc with the highest cosine similarity to the query and returns it.
+
+    Takes as input:
+    :param question: the string of the current question
+    :param corpus_json: location of json file with docs
+    :return: a string with the text of the doc with the highest cosine similarity to the query.
+    """
+    data, vectorizer, X = load_tfidf(corpus_json)
+    query = [question]
+    query_vector = vectorizer.transform(query)
+    query_vector = normalize(query_vector, axis=1, norm="l1")
+
+    # Now the multiplication
+    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+
+    res_data = data[np.argmax(res)]
+    res_data_string = (f'{res_data["text_name"]}\n\n'
+                       f'{res_data["book_label"]}\n\n'
+                       f'{res_data["chapter_label"]}\n\n'
+                       f'{res_data["chapter_text"]}')
+    return res_data_string
+
