@@ -1,5 +1,6 @@
 import argparse
 from ir import ir_single_query_top_doc
+import streamlit as st
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -8,7 +9,7 @@ def get_args():
 
 def main(question):
     res = ir_single_query_top_doc(question)
-    print(res)
+    st.write(res)
     return res
 
 if __name__ == "__main__":
