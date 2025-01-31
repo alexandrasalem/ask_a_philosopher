@@ -64,9 +64,11 @@ def ir_single_query_top_doc(question,  corpus_json='aristotle.json'):
     res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
 
     res_data = data[np.argmax(res)]
-    res_data_string = (f'{res_data["text_name"]}\n\n'
-                       f'{res_data["book_label"]}\n\n'
-                       f'{res_data["chapter_label"]}\n\n'
-                       f'{res_data["chapter_text"]}')
+    res_data_string = (f'You provided the following query: {question}\n\n'
+                       f'Here is the closest chapter to that query:\n'
+                       f'Text name: {res_data["text_name"]}\n\n'
+                       f'Book name: {res_data["book_label"]}\n\n'
+                       f'Chapter name: {res_data["chapter_label"]}\n\n'
+                       f'Chapter text: {res_data["chapter_text"]}')
     return res_data_string
 

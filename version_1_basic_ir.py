@@ -8,6 +8,7 @@ def get_args():
 
 def main(question):
     res = ir_single_query_top_doc(question)
+    print(res)
     return res
 
 if __name__ == "__main__":
