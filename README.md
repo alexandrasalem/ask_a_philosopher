@@ -4,6 +4,8 @@ This project uses retrieval-augmented generation (RAG) for answering questions, 
 
 In RAG, first a relevant document to the query is identified using standard Information Retrieval (IR) techniques. Then, a generative LLM generates an answer given the query and retrieved document.
 
+We use Python 3.11.9. Install requirements using `pip install -r requirements.txt`.
+
 Details on our code thus far (WIP):
 
 We pulled down the Aristotle chapters with `pull_data.py`.
