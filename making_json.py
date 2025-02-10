@@ -118,10 +118,15 @@ end_re = "^\s+THE END.\n"
 test = split_to_dict_list(first_text[180:],"Aristotle's Works", book_re=book_re, chapter_re=chapter_re, end_re=end_re)
 all_text_dict_list.extend(test)
 
+# add id
+id = 0
+for element in all_text_dict_list:
+    element["id"] = id
+    id+=1
 
 # Serializing json
 json_object = json.dumps(all_text_dict_list, indent=4)
 #
 # # Writing to sample.json
-with open("aristotle.json", "w") as outfile:
+with open("aristotle_2.json", "w") as outfile:
     outfile.write(json_object)
