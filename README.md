@@ -19,3 +19,5 @@ The script `version_1_basic_ir.py` generates the closest document to the query a
 The script `version_1_basic_ir_cos_sims.py` pulls cosine similarity values between the query and each of the documents, and returns this as a list of dictionaries.
 
 The script `version_1_basic_ir_multiple_questions.py` generates the closest documents to a collection of queries and returns those as a string.
+
+The script `version_1_basic_ir_user_input.py` generates the closest document to a query provided by the user in streamlit and returns that document as a string.
