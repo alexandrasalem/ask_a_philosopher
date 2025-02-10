@@ -128,5 +128,5 @@ for element in all_text_dict_list:
 json_object = json.dumps(all_text_dict_list, indent=4)
 #
 # # Writing to sample.json
-with open("aristotle_2.json", "w") as outfile:
+with open("aristotle.json", "w") as outfile:
     outfile.write(json_object)
