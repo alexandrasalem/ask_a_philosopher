@@ -6,13 +6,13 @@ import pandas as pd
 
 def load_tfidf(corpus_json):
     """
-    This function creates a data variable tfidf vectorizer, and tfidf matrix for a given json corpus.
+    This function creates a data variable tfidf vectorizer, and document-term matrix for a given json corpus.
     It expects a json file with 'chapter_text' in each element.
 
     Takes as input:
     :param corpus_json: location of json file with docs
     And then outputs:
-    :return: the loaded corpus data (data), the vectorizer for the tfidf (vectorizer), and the tfidf matrix (X)
+    :return: the loaded corpus data (data), the vectorizer for the tfidf (vectorizer), and the document-term matrix (X)
     """
     with open(corpus_json, 'r') as file:
         data = json.load(file)
@@ -23,6 +23,20 @@ def load_tfidf(corpus_json):
     vectorizer.get_feature_names_out()
     X = normalize(X, axis=1, norm="l1")
     return data, vectorizer, X
+
+def calc_cos_sim(list_of_questions, tfidf_vectorizer, X):
+    """
+    This function calculates the cosine similarity between questions and answers.
+    :param list_of_questions: a list of questions, each as a string
+    :param tfidf_vectorizer: the vectorizer from tfidf
+    :param X: The document-term matrix
+    :return: a matrix of cosine similarities of size (# documents, # questions)
+    """
+    query_vector = tfidf_vectorizer.transform(list_of_questions)
+    query_vector = normalize(query_vector, axis=1, norm="l1")
+
+    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+    return res
 
 def ir_single_query_cos_sims(question,  corpus_json='aristotle.json'):
     """
@@ -37,12 +51,9 @@ def ir_single_query_cos_sims(question,  corpus_json='aristotle.json'):
     """
     data, vectorizer, X = load_tfidf(corpus_json)
     query = [question]
-    query_vector = vectorizer.transform(query)
-    query_vector = normalize(query_vector, axis=1, norm="l1")
-
-    # Now the multiplication
-    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+    res = calc_cos_sim(query, vectorizer, X)
     res = list(np.squeeze(res))
+
     for i in range(len(data)):
         data[i]['cos_sim_to_query'] = res[i]
     return data
@@ -58,11 +69,7 @@ def ir_single_query_top_doc(question,  corpus_json='aristotle.json'):
     """
     data, vectorizer, X = load_tfidf(corpus_json)
     query = [question]
-    query_vector = vectorizer.transform(query)
-    query_vector = normalize(query_vector, axis=1, norm="l1")
-
-    # Now the multiplication
-    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+    res = calc_cos_sim(query, vectorizer, X)
 
     res_data = data[np.argmax(res)]
     res_data_string = (f'You provided the following query: {question}\n\n'
@@ -88,11 +95,8 @@ def ir_multiple_query_top_doc(question_csv,  corpus_json='aristotle.json'):
     queries = list(questions['Question'])
     answers = list(questions['Answer'])
     ids = list(questions['Answer_id'])
-    query_vector = vectorizer.transform(queries)
-    query_vector = normalize(query_vector, axis=1, norm="l1")
+    res = calc_cos_sim(queries, vectorizer, X)
 
-    # Now the multiplication
-    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
     res_data = np.argmax(res, axis=0)
     res_data = res_data.astype(int)
     res_data = [data[i] for i in res_data]
