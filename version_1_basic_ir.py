@@ -5,11 +5,13 @@ import streamlit as st
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("question", type=str, help="type in a question you want to ask, surrounded by quotes")
+    parser.add_argument("--use_streamlit", action="store_true", help="Whether to use streamlit")
     return parser.parse_args()
 
-def main(question):
+def main(question, use_streamlit=False):
     res = ir_single_query_top_doc(question)
-    st.write(res)
+    if use_streamlit:
+        st.write(res)
     return res
 
 if __name__ == "__main__":
