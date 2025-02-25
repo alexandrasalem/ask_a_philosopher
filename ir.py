@@ -3,8 +3,29 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import normalize
 import numpy as np
 import pandas as pd
+from transformers import AutoTokenizer, BertModel
+import torch
+import re
+import csv
 
-def load_tfidf(corpus_json):
+def load_tfidf(data):
+    """
+    This function creates a tfidf vectorizer and document-term matrix.
+
+    Takes as input:
+    :param data: corpus data, loaded as a dataframe, with 'chapter_text' column.
+    And then outputs:
+    :return: the vectorizer for the tfidf (vectorizer), and the document-term matrix (X)
+    """
+
+    corpus = [item['chapter_text'] for item in data]
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(corpus)
+    vectorizer.get_feature_names_out()
+    X = normalize(X, axis=1, norm="l1")
+    return vectorizer, X
+
+def load_bert(bert_reps_path = 'bert_files.csv'):
     """
     This function creates a data variable tfidf vectorizer, and document-term matrix for a given json corpus.
     It expects a json file with 'chapter_text' in each element.
@@ -14,17 +35,63 @@ def load_tfidf(corpus_json):
     And then outputs:
     :return: the loaded corpus data (data), the vectorizer for the tfidf (vectorizer), and the document-term matrix (X)
     """
+
+    X = np.loadtxt(bert_reps_path, delimiter=",") #pd.read_csv(bert_reps_path, header=None)
+    X = normalize(X, axis=1, norm="l1")
+    return X
+
+
+def grab_bert_rep(sentences, tokenizer, model):
+    rep_sentence = None
+    count = 0
+    for sentence in sentences:
+        inputs = tokenizer(sentence, return_tensors="pt", padding=True)
+        outputs = model(**inputs)
+
+        last_hidden_state = outputs.pooler_output.detach().numpy().squeeze()
+        if rep_sentence is not None:
+            rep_sentence = ((rep_sentence*count) + last_hidden_state)/(count+1)
+            count += 1
+        else:
+            rep_sentence = last_hidden_state
+    return rep_sentence
+
+def create_bert_corpus_reps(corpus_json):
     with open(corpus_json, 'r') as file:
         data = json.load(file)
 
     corpus = [item['chapter_text'] for item in data]
-    vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(corpus)
-    vectorizer.get_feature_names_out()
-    X = normalize(X, axis=1, norm="l1")
-    return data, vectorizer, X
+    ids = [item['id'] for item in data]
 
-def calc_cos_sim(list_of_questions, tfidf_vectorizer, X):
+    tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+    model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+
+    chapter_lengths = []
+    with open("bert_files.csv", 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        for i in range(len(corpus)):
+            chapter_text = corpus[i]
+            id = ids[i]
+            chapter_split = re.split(r'[\!\?\.][ \n]', chapter_text)
+            chapter_lengths.append(len(chapter_split))
+            last_hidden_states_avg = grab_bert_rep(chapter_split, tokenizer, model)
+            writer.writerow([id]+last_hidden_states_avg.tolist())
+
+# def calc_cos_sim(list_of_questions, tfidf_vectorizer, X):
+#     """
+#     This function calculates the cosine similarity between questions and answers.
+#     :param list_of_questions: a list of questions, each as a string
+#     :param tfidf_vectorizer: the vectorizer from tfidf
+#     :param X: The document-term matrix
+#     :return: a matrix of cosine similarities of size (# documents, # questions)
+#     """
+#     query_vector = tfidf_vectorizer.transform(list_of_questions)
+#     query_vector = normalize(query_vector, axis=1, norm="l1")
+#
+#     res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+#     return res
+
+def calc_cos_sim(query_vector, X):
     """
     This function calculates the cosine similarity between questions and answers.
     :param list_of_questions: a list of questions, each as a string
@@ -32,13 +99,13 @@ def calc_cos_sim(list_of_questions, tfidf_vectorizer, X):
     :param X: The document-term matrix
     :return: a matrix of cosine similarities of size (# documents, # questions)
     """
-    query_vector = tfidf_vectorizer.transform(list_of_questions)
-    query_vector = normalize(query_vector, axis=1, norm="l1")
+    #query_vector = tfidf_vectorizer.transform(list_of_questions)
+    #query_vector = normalize(query_vector, axis=1, norm="l1")
 
-    res = np.matmul(X.toarray(), np.transpose(query_vector.toarray()))
+    res = np.matmul(X, np.transpose(query_vector))
     return res
 
-def ir_single_query_cos_sims(question,  corpus_json='aristotle.json'):
+def ir_single_query_cos_sims(question,  use_bert = False, corpus_json='aristotle.json'):
     """
     This function generates the cosine similarity values between the query and every doc in the corpus.
     Its output is in the form of a list of dictionaries (which can be converted to a json).
@@ -49,16 +116,31 @@ def ir_single_query_cos_sims(question,  corpus_json='aristotle.json'):
     And then outputs:
     :return: the json with the element 'cos_sim_to_query' appended to each doc's item
     """
-    data, vectorizer, X = load_tfidf(corpus_json)
-    query = [question]
-    res = calc_cos_sim(query, vectorizer, X)
-    res = list(np.squeeze(res))
+    with open(corpus_json, 'r') as file:
+        data = json.load(file)
 
+    if use_bert:
+        X = load_bert()
+        X_edited = np.delete(X, 0, axis=1)
+        tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+        model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+        inputs = tokenizer(question, return_tensors="pt", padding=True)
+        outputs = model(**inputs)
+        last_hidden_state = outputs.pooler_output.detach().numpy()  # .squeeze()
+        last_hidden_state = normalize(last_hidden_state, axis=1, norm="l1")
+        res = calc_cos_sim(last_hidden_state, X_edited)
+    else:
+        vectorizer, X = load_tfidf(data)
+        query = [question]
+        query_vector = vectorizer.transform(query)
+        query_vector = normalize(query_vector, axis=1, norm="l1")
+        res = calc_cos_sim(query_vector.toarray(), X.toarray())
+    res = list(np.squeeze(res))
     for i in range(len(data)):
         data[i]['cos_sim_to_query'] = res[i]
     return data
 
-def ir_single_query_top_doc(question,  corpus_json='aristotle.json'):
+def ir_single_query_top_doc(question,  use_bert=False, corpus_json='aristotle.json'):
     """
     This function pulls the doc with the highest cosine similarity to the query and returns it.
 
@@ -67,9 +149,25 @@ def ir_single_query_top_doc(question,  corpus_json='aristotle.json'):
     :param corpus_json: location of json file with docs
     :return: a string with the text of the doc with the highest cosine similarity to the query.
     """
-    data, vectorizer, X = load_tfidf(corpus_json)
-    query = [question]
-    res = calc_cos_sim(query, vectorizer, X)
+    with open(corpus_json, 'r') as file:
+        data = json.load(file)
+
+    if use_bert:
+        X = load_bert()
+        X_edited = np.delete(X, 0, axis=1)
+        tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+        model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+        inputs = tokenizer(question, return_tensors="pt", padding=True)
+        outputs = model(**inputs)
+        last_hidden_state = outputs.pooler_output.detach().numpy()  # .squeeze()
+        last_hidden_state = normalize(last_hidden_state, axis=1, norm="l1")
+        res = calc_cos_sim(last_hidden_state, X_edited)
+    else:
+        vectorizer, X = load_tfidf(data)
+        query = [question]
+        query_vector = vectorizer.transform(query)
+        query_vector = normalize(query_vector, axis=1, norm="l1")
+        res = calc_cos_sim(query_vector.toarray(), X.toarray())
 
     res_data = data[np.argmax(res)]
     res_data_string = (f'You provided the following query: {question}\n\n'
@@ -80,7 +178,7 @@ def ir_single_query_top_doc(question,  corpus_json='aristotle.json'):
                        f'Chapter text: {res_data["chapter_text"]}')
     return res_data_string
 
-def ir_multiple_query_top_doc(question_csv,  corpus_json='aristotle.json'):
+def ir_multiple_query_top_doc(question_csv,  use_bert=False, corpus_json='aristotle.json'):
     """
     This function pulls the doc with the highest cosine similarity to the query and returns it.
 
@@ -89,18 +187,34 @@ def ir_multiple_query_top_doc(question_csv,  corpus_json='aristotle.json'):
     :param corpus_json: location of json file with docs
     :return: strings with the text of the docs with the highest cosine similarity to the queries. Printed as a series of text snippets.
     """
-    data, vectorizer, X = load_tfidf(corpus_json)
-    questions = pd.read_csv(question_csv, sep=",")
+    with open(corpus_json, 'r') as file:
+        data = json.load(file)
 
+    questions = pd.read_csv(question_csv, sep=",")
     queries = list(questions['Question'])
-    answers = list(questions['Answer'])
-    ids = list(questions['Answer_id'])
-    res = calc_cos_sim(queries, vectorizer, X)
+
+    if use_bert:
+        X = load_bert()
+        X_edited = np.delete(X, 0, axis=1)
+        tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+        model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+        inputs = tokenizer(queries, return_tensors="pt", padding=True)
+        outputs = model(**inputs)
+        last_hidden_state = outputs.pooler_output.detach().numpy()  # .squeeze()
+        last_hidden_state = normalize(last_hidden_state, axis=1, norm="l1")
+        res = calc_cos_sim(last_hidden_state, X_edited)
+    else:
+        vectorizer, X = load_tfidf(data)
+        query_vectors = vectorizer.transform(queries)
+        query_vectors = normalize(query_vectors, axis=1, norm="l1")
+        res = calc_cos_sim(query_vectors.toarray(), X.toarray())
 
     res_data = np.argmax(res, axis=0)
     res_data = res_data.astype(int)
     res_data = [data[i] for i in res_data]
 
+    answers = list(questions['Answer'])
+    ids = list(questions['Answer_id'])
     res_ids = [item["id"] for item in res_data]
     tot = len(res_ids)
     tot_corr = 0
@@ -123,4 +237,36 @@ def ir_multiple_query_top_doc(question_csv,  corpus_json='aristotle.json'):
                             f'-----------------------------------------\n\n')
     #print(res_data_string)
     return res_data_string
+
+# def ir_bert_single_query_top_doc(question,  corpus_json='aristotle.json'):
+#     """
+#     This function pulls the doc with the highest cosine similarity to the query and returns it.
+#
+#     Takes as input:
+#     :param question: the string of the current question
+#     :param corpus_json: location of json file with docs
+#     :return: a string with the text of the doc with the highest cosine similarity to the query.
+#     """
+#     with open(corpus_json, 'r') as file:
+#         data = json.load(file)
+#
+#     X = load_bert()
+#     X_edited = np.delete(X, 0, axis=1)
+#     tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+#     model = BertModel.from_pretrained("google-bert/bert-base-uncased")
+#     inputs = tokenizer(question, return_tensors="pt", padding=True)
+#     outputs = model(**inputs)
+#     last_hidden_state = outputs.pooler_output.detach().numpy()#.squeeze()
+#     last_hidden_state = normalize(last_hidden_state, axis=1, norm="l1")
+#
+#     res = calc_cos_sim(last_hidden_state, X_edited)
+#     #
+#     res_data = data[np.argmax(res)]
+#     res_data_string = (f'You provided the following query: {question}\n\n'
+#                        f'Here is the closest chapter to that query:\n'
+#                        f'Text name: {res_data["text_name"]}\n\n'
+#                        f'Book name: {res_data["book_label"]}\n\n'
+#                        f'Chapter name: {res_data["chapter_label"]}\n\n'
+#                        f'Chapter text: {res_data["chapter_text"]}')
+#     return res_data_string
 
