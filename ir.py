@@ -233,5 +233,3 @@ def ir_multiple_query_top_doc(question_csv,  use_bert=False, corpus_json='aristo
     #print(res_data_string)
     return res_data_string
 
-
-#create_bert_corpus_reps('aristotle.json')
