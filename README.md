@@ -22,4 +22,4 @@ The script `version_1_basic_ir_multiple_questions.py` generates the closest docu
 
 The script `version_1_basic_ir_user_input.py` generates the closest document to a query provided by the user in streamlit and returns that document as a string.
 
-Each of the scripts above uses a basic IR system with tf-idf. Variations of each of these scripts for version 2 which uses BERT instead of tf-idf for the IR are now available (`version_2_bert_ir.py`, etc).
+Each of the scripts above uses a basic IR system with tf-idf. Variations of each of these scripts for version 2 which uses BERT instead of tf-idf for the IR are now available (`version_2_bert_ir.py`, etc). First, run `python create_bert_files.py`. Then run those scripts.
