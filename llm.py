@@ -16,7 +16,7 @@ def single_query_response(question):
     ]
     outputs = pipe(
         messages,
-        max_new_tokens=256,
     )
+    print(outputs)
     text_output = outputs[0]["generated_text"][-1]
     return text_output
