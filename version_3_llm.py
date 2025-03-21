@@ -1,6 +1,7 @@
 import argparse
 from llm import single_query_response
 import streamlit as st
+import time
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -9,12 +10,15 @@ def get_args():
     return parser.parse_args()
 
 def main(question, use_streamlit=False):
+    start = time.time()
     if use_streamlit:
         st.write("Asking Llama...")
     res = single_query_response(question)
     print(res)
     if use_streamlit:
         st.write(res)
+    end = time.time()
+    print(f'Time to produce response: {end - start}')
     return res
 
 if __name__ == "__main__":
