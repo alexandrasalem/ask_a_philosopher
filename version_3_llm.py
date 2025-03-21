@@ -12,6 +12,7 @@ def main(question, use_streamlit=False):
     if use_streamlit:
         st.write("Asking Llama...")
     res = single_query_response(question)
+    print(res)
     if use_streamlit:
         st.write(res)
     return res
