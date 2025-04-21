@@ -1,7 +1,8 @@
 import argparse
+import os
 from llm import multiple_query_responses
 import streamlit as st
-import time
+from datetime import datetime
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -11,6 +12,11 @@ def get_args():
 
 def main(question_csv, use_streamlit=False):
     res = multiple_query_responses(question_csv)
+    current_date = datetime.now()
+    date_string = current_date.strftime("%Y-%m-%d")
+    os.makedirs(date_string, exist_ok=False)
+    filename = f'{date_string}/{question_csv[:-4]}_responses.csv'
+    res.to_csv(filename, index=False)
     if use_streamlit:
         st.write(res)
     print(res)
