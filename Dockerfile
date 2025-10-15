@@ -1,0 +1,14 @@
+FROM python:3.11-slim
+
+WORKDIR /
+
+
+# Copy your handler file and requirements
+COPY rp_handler_ask_a_phil.py /
+COPY requirements.txt /
+
+# Install dependencies
+RUN pip install -r requirements.txt
+
+# Start the container
+CMD ["python3", "-u", "rp_handler_ask_a_phil.py"]
