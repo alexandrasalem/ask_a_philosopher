@@ -6,10 +6,10 @@ import time
 prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."
 
 def process_input_llm(question, prompt):
-    #llm_res = single_query_response(question, prompt = prompt)
+    llm_res = single_query_response(question, prompt = prompt)
     res = f"Your question: {question}\n"
     res += "Answer:\n"
-    #res += llm_res['content']
+    res += llm_res['content']
     return res
 
 def process_input_rag(question, prompt):
