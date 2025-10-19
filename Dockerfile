@@ -4,6 +4,8 @@ WORKDIR /
 
 
 # Copy your handler file and requirements
+COPY llm.py /
+COPY ir.py /
 COPY rp_handler_ask_a_phil.py /
 COPY requirements.txt /
 
