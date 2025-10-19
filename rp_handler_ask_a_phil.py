@@ -2,6 +2,11 @@ from llm import single_query_response
 from ir import ir_single_query_top_doc
 import runpod
 import time
+from huggingface_hub import login
+import os
+
+hf_token = os.environ['HF_TOKEN']
+login(token=hf_token)
 
 prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."
 
