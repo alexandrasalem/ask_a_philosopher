@@ -10,9 +10,9 @@ login(token=hf_token)
 
 prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."
 
-def process_input_llm(initial_question, prompt):
+def process_input_llm(question, prompt):
     question = st.text_input("Type your question for Aristotle below. An example is provided:",
-                             initial_question)
+                             question)
     llm_res = single_query_response(question, prompt = prompt)
     #res = f"Your question: {question}\n"
     #res += "Answer:\n"
