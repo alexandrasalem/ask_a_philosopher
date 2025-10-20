@@ -1,20 +1,23 @@
 from llm import single_query_response
 from ir import ir_single_query_top_doc
 import runpod
-import time
 from huggingface_hub import login
 import os
+import streamlit as st
 
 hf_token = os.environ['HF_TOKEN']
 login(token=hf_token)
 
 prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."
 
-def process_input_llm(question, prompt):
+def process_input_llm(initial_question, prompt):
+    question = st.text_input("Type your question for Aristotle below. An example is provided:",
+                             initial_question)
     llm_res = single_query_response(question, prompt = prompt)
-    res = f"Your question: {question}\n"
-    res += "Answer:\n"
-    res += llm_res['content']
+    #res = f"Your question: {question}\n"
+    #res += "Answer:\n"
+    res = llm_res['content']
+    st.write(res)
     return res
 
 def process_input_rag(question, prompt):
