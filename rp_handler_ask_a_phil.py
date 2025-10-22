@@ -4,18 +4,6 @@ import runpod
 from huggingface_hub import login
 import os
 import streamlit as st
-import subprocess
-import threading
-
-def launch_streamlit():
-    subprocess.Popen([
-        "streamlit", "run", "app.py",
-        "--server.port=8080",
-        "--server.address=0.0.0.0"
-    ])
-
-# Start Streamlit in a separate thread when the pod starts
-threading.Thread(target=launch_streamlit, daemon=True).start()
 
 hf_token = os.environ['HF_TOKEN']
 login(token=hf_token)
@@ -23,14 +11,8 @@ login(token=hf_token)
 prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."
 
 def process_input_llm(question, prompt):
-    # trying again
-    question = st.text_input("Type your question for Aristotle below. An example is provided:",
-                             question)
     llm_res = single_query_response(question, prompt = prompt)
-    #res = f"Your question: {question}\n"
-    #res += "Answer:\n"
     res = llm_res['content']
-    st.write(res)
     return res
 
 def process_input_rag(question, prompt):
