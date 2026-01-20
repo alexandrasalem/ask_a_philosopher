@@ -8,7 +8,7 @@ import streamlit as st
 hf_token = os.environ['HF_TOKEN']
 login(token=hf_token)
 
-prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
+#prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
 
 def process_input_llm(question, prompt):
     llm_res = single_query_response(question, prompt = prompt)
@@ -39,6 +39,8 @@ def handler(event):
     input = event['input']
 
     question = input.get('question')
+    philosopher = input.get('philosopher')
+    prompt = f"You are the ancient philosopher, {philosopher}. Respond to this question as {philosopher} would. Keep your response very short."
     #seconds = input.get('seconds', 0)
 
     print(f"Received question: {question}")
