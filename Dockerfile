@@ -8,6 +8,7 @@ COPY llm.py /
 COPY ir.py /
 COPY rp_handler_ask_a_phil.py /
 COPY requirements.txt /
+COPY aristotle.json /
 
 # Install dependencies
 RUN pip install -r requirements.txt
