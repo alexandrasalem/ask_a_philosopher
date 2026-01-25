@@ -19,9 +19,10 @@ def process_input_rag(question, prompt):
     doc = ir_single_query_top_doc(question)
     prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
     llm_res = single_query_response(question, prompt = prompt)
-    res = f"Your question: {question}\n"
-    res += "Answer:\n"
-    res += llm_res['content']
+    #res = f"Your question: {question}\n"
+    #res += "Answer:\n"
+    #res += llm_res['content']
+    res = llm_res['content']
     return res
 
 
@@ -40,6 +41,7 @@ def handler(event):
 
     question = input.get('question')
     philosopher = input.get('philosopher')
+    rag = input.get('rag')
     prompt = f"You are the ancient philosopher, {philosopher}. Respond to this question as {philosopher} would. Keep your response very short."
     #seconds = input.get('seconds', 0)
 
@@ -47,8 +49,10 @@ def handler(event):
     #print(f"Sleeping for {seconds} seconds...")
 
     # You can replace this sleep call with your own Python code
-    res = process_input_llm(question = question, prompt = prompt)
-
+    if rag == "No":
+        res = process_input_llm(question = question, prompt = prompt)
+    else:
+        res = process_input_rag(question=question, prompt=prompt)
     return res
 
 
