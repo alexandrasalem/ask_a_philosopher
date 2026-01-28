@@ -16,13 +16,14 @@ def process_input_llm(question, prompt):
     return res
 
 def process_input_rag(question, prompt):
-    doc = ir_single_query_top_doc(question)
+    doc, info = ir_single_query_top_doc(question)
     prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
     llm_res = single_query_response(question, prompt = prompt)
     #res = f"Your question: {question}\n"
     #res += "Answer:\n"
     #res += llm_res['content']
-    res = llm_res['content']
+    res = info
+    res += llm_res['content']
     return res
 
 

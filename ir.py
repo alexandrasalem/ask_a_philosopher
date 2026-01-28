@@ -169,8 +169,9 @@ def ir_single_query_top_doc(question,  use_bert=False, corpus_json='aristotle.js
                        f'Text name: {res_data["text_name"]}\n\n'
                        f'Book name: {res_data["book_label"]}\n\n'
                        f'Chapter name: {res_data["chapter_label"]}\n\n'
-                       f'Chapter text: {res_data["chapter_text"]}')
-    return res_data_string
+                       #f'Chapter text: {res_data["chapter_text"]}'
+                       )
+    return res_data["chapter_text"], res_data_string
 
 def ir_multiple_query_top_doc(question_csv,  use_bert=False, corpus_json='aristotle.json'):
     """
