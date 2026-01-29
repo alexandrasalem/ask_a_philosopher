@@ -11,6 +11,7 @@ login(token=hf_token)
 #prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
 
 def process_input_llm(question, prompt):
+    prompt = prompt + " Keep your response very short."
     llm_res = single_query_response(question, prompt = prompt)
     res = llm_res['content']
     return res
@@ -18,6 +19,7 @@ def process_input_llm(question, prompt):
 def process_input_rag(question, prompt):
     doc, info = ir_single_query_top_doc(question)
     prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
+    prompt = prompt + "\n\nKeep your response very short."
     llm_res = single_query_response(question, prompt = prompt)
     #res = f"Your question: {question}\n"
     #res += "Answer:\n"
@@ -43,7 +45,7 @@ def handler(event):
     question = input.get('question')
     philosopher = input.get('philosopher')
     rag = input.get('rag')
-    prompt = f"You are the ancient philosopher, {philosopher}. Respond to this question as {philosopher} would. Keep your response very short."
+    prompt = f"You are the ancient philosopher, {philosopher}. Respond to this question as {philosopher} would."
     #seconds = input.get('seconds', 0)
 
     print(f"Received question: {question}")
