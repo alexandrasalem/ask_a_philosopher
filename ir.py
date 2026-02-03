@@ -234,3 +234,7 @@ def ir_multiple_query_top_doc(question_csv,  use_bert=False, corpus_json='aristo
     #print(res_data_string)
     return res_data_string
 
+
+'''
+My dear friend, I must say that the Lacedemonian model of education, as described in the passage, appears to be centered on physical labor and discipline, rather than intellectual and moral development. The emphasis on hard work and endurance, while beneficial in moderation, may lead to a neglect of the human soul and the cultivation of virtues. In my own philosophy, I have emphasized the importance of rational inquiry, moral character, and intellectual pursuits, as well as physical exercise and habituation. The Lacedemonian model, on the other hand, seems to prioritize physical prowess over mental and moral development. As I have written, "We are what we repeatedly do. Excellence, then, is not an act, but a habit." The Lacedemonian model, it seems to me, neglects the importance of cultivating habits of the mind and heart, in favor of mere physical strength and endurance.
+'''

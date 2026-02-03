@@ -16,8 +16,8 @@ def process_input_llm(question, prompt):
     res = llm_res['content']
     return res
 
-def process_input_rag(question, prompt):
-    doc, info = ir_single_query_top_doc(question)
+def process_input_rag(question, prompt, corpus):
+    doc, info = ir_single_query_top_doc(question, use_bert=False, corpus_json=corpus)
     prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
     prompt = prompt + "\n\nKeep your response very short."
     llm_res = single_query_response(question, prompt = prompt)
@@ -51,11 +51,13 @@ def handler(event):
     print(f"Received question: {question}")
     #print(f"Sleeping for {seconds} seconds...")
 
-    # You can replace this sleep call with your own Python code
     if rag == "No":
         res = process_input_llm(question = question, prompt = prompt)
     else:
-        res = process_input_rag(question=question, prompt=prompt)
+        if philosopher == "Aristotle":
+            res = process_input_rag(question=question, prompt=prompt, corpus="aristotle.json")
+        else:
+            res = process_input_rag(question=question, prompt=prompt, corpus="confucius.json")
     return res
 
 
