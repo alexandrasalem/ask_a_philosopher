@@ -44,14 +44,14 @@ def handler(event):
 
     question = input.get('question')
     philosopher = input.get('philosopher')
-    rag = input.get('rag')
+    mode = input.get('mode')
     prompt = f"You are the ancient philosopher, {philosopher}. Respond to this question as {philosopher} would."
     #seconds = input.get('seconds', 0)
 
     print(f"Received question: {question}")
     #print(f"Sleeping for {seconds} seconds...")
 
-    if rag == "No":
+    if mode == "LLM-only":
         res = process_input_llm(question = question, prompt = prompt)
     else:
         if philosopher == "Aristotle":
