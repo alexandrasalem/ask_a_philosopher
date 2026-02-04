@@ -10,7 +10,8 @@ COPY rp_handler_ask_a_phil.py /
 COPY requirements.txt /
 COPY aristotle.json /
 COPY confucius.json /
-COPY avatars /
+COPY Aristotle.jpg /
+COPY Confucius.jpg /
 
 # Install dependencies
 RUN pip install -r requirements.txt
