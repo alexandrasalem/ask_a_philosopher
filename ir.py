@@ -164,14 +164,22 @@ def ir_single_query_top_doc(question,  use_bert=False, corpus_json='aristotle.js
         res = calc_cos_sim(query_vector.toarray(), X.toarray())
 
     res_data = data[np.argmax(res)]
-    res_data_string = (f'You provided the following query: {question}\n\n'
-                       f'Here is the closest chapter to that query:\n'
-                       f'Text name: {res_data["text_name"]}\n\n'
-                       f'Book name: {res_data["book_label"]}\n\n'
-                       f'Chapter name: {res_data["chapter_label"]}\n\n'
-                       #f'Chapter text: {res_data["chapter_text"]}'
-                       )
-    return res_data["chapter_text"], res_data_string
+
+    chapter_info = "Here is the closest text to that question: "
+
+    if res_data['book_label'] == None:
+        if res_data['chapter_label'] == None:
+            chapter_info += f'{res_data["text_name"]}'
+        else:
+            chapter_info += f'{res_data["text_name"]}, Chapter {res_data["chapter_label"]}'
+    else:
+        if res_data['chapter_label'] == None:
+            chapter_info += f'{res_data["text_name"]}, Book {res_data["book_label"]}'
+        else:
+            chapter_info += f'{res_data["text_name"]}, Book {res_data["book_label"]}, Chapter {res_data["chapter_label"]}'
+    chapter_info = chapter_info + "\n"
+
+    return res_data["chapter_text"], chapter_info
 
 def ir_multiple_query_top_doc(question_csv,  use_bert=False, corpus_json='aristotle.json'):
     """
