@@ -177,7 +177,7 @@ def ir_single_query_top_doc(question,  use_bert=False, corpus_json='aristotle.js
             chapter_info += f'{res_data["text_name"]}, Book {res_data["book_label"]}'
         else:
             chapter_info += f'{res_data["text_name"]}, Book {res_data["book_label"]}, Chapter {res_data["chapter_label"]}'
-    chapter_info = chapter_info + "\n"
+    chapter_info = chapter_info + "\n\n"
 
     return res_data["chapter_text"], chapter_info
 
