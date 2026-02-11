@@ -164,8 +164,9 @@ def ir_single_query_top_doc(question,  use_bert=False, corpus_json='aristotle.js
         res = calc_cos_sim(query_vector.toarray(), X.toarray())
 
     res_data = data[np.argmax(res)]
+    sim = np.max(res)
 
-    chapter_info = "Here is the closest text to that question: "
+    chapter_info = "I've discussed this topic in the following text: "
 
     if res_data['book_label'] == None:
         if res_data['chapter_label'] == None:
@@ -179,7 +180,7 @@ def ir_single_query_top_doc(question,  use_bert=False, corpus_json='aristotle.js
             chapter_info += f'{res_data["text_name"]}, Book {res_data["book_label"]}, Chapter {res_data["chapter_label"]}'
     chapter_info = chapter_info + "\n\n"
 
-    return res_data["chapter_text"], chapter_info
+    return res_data["chapter_text"], chapter_info, sim
 
 def ir_multiple_query_top_doc(question_csv,  use_bert=False, corpus_json='aristotle.json'):
     """

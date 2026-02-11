@@ -17,16 +17,13 @@ def process_input_llm(question, prompt):
     return res
 
 def process_input_rag(question, prompt, corpus):
-    doc, info = ir_single_query_top_doc(question, use_bert=False, corpus_json=corpus)
+    doc, info, sim = ir_single_query_top_doc(question, use_bert=False, corpus_json=corpus)
     prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
     prompt = prompt + "\n\nKeep your response very short."
     llm_res = single_query_response(question, prompt = prompt)
-    #res = f"Your question: {question}\n"
-    #res += "Answer:\n"
-    #res += llm_res['content']
     res = info
     res += llm_res['content']
-    return res
+    return res, sim
 
 
 def handler(event):
@@ -53,12 +50,13 @@ def handler(event):
 
     if mode == "LLM-only":
         res = process_input_llm(question = question, prompt = prompt)
+        sim = None
     else:
         if philosopher == "Aristotle":
-            res = process_input_rag(question=question, prompt=prompt, corpus="aristotle.json")
+            res, sim = process_input_rag(question=question, prompt=prompt, corpus="aristotle.json")
         else:
-            res = process_input_rag(question=question, prompt=prompt, corpus="confucius.json")
-    return res
+            res, sim = process_input_rag(question=question, prompt=prompt, corpus="confucius.json")
+    return res, sim
 
 
 # Start the Serverless function when the script is run
