@@ -2,8 +2,39 @@ import requests
 import streamlit as st
 import json
 import hmac
+from google.cloud import texttospeech
+from google.oauth2 import service_account
 
 # add the streaming capabilities
+
+@st.cache_resource
+def get_tts_client():
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"]
+    )
+    return texttospeech.TextToSpeechClient(credentials=credentials)
+
+client = get_tts_client()
+
+def generate_tts(text):
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+
+    voice = texttospeech.VoiceSelectionParams(
+        language_code="en-US",
+        name="en-US-Neural2-J"
+    )
+
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    response = client.synthesize_speech(
+        input=synthesis_input,
+        voice=voice,
+        audio_config=audio_config
+    )
+
+    return response.audio_content
 
 def on_sidebar_change():
     config = (
@@ -105,7 +136,13 @@ for message in st.session_state.messages:
         avatar = f"{message['avatar']}"
 
     with st.chat_message(message["role"], avatar=avatar):
-        st.markdown(message["content"])
+        col1, col2 = st.columns([7, 2])
+        with col1:
+            st.markdown(message["content"])
+        with col2:
+            st.session_state[f"audio_0"] = generate_tts(message["content"])
+            st.audio(st.session_state[f"audio_0"], format="audio/mp3")
+
 
 
 # Handling user input through chat
@@ -120,7 +157,7 @@ if question := st.chat_input():
     # Display user message in chat
     st.chat_message("user").write(question)
     # Send API request and process the streaming response
-    response = requests.post('https://api.runpod.ai/v2/38z94rrm7q5n9c/runsync', stream=True, json=data, headers=headers)
+    response, sim = requests.post('https://api.runpod.ai/v2/38z94rrm7q5n9c/runsync', stream=True, json=data, headers=headers)
     msg = response
     for line in response.iter_lines():
         # Filter out keep-alive newlines
@@ -129,9 +166,17 @@ if question := st.chat_input():
 
     # Extract the assistant's response from the API response and update session state
     msg = json.loads(decoded_line)['output']
+    msg = f"{msg} {str(sim)}"
     st.session_state.messages.append({"role": "assistant", "content": msg, "avatar": f"{phil}.jpg"})
     # Display the assistant's response in chat
 
     with st.chat_message("assistant", avatar=f"{phil}.jpg"):
-        st.markdown(msg)
+        col1, col2 = st.columns([7, 2])
+        with col1:
+            st.markdown(msg)
+        with col2:
+            st.session_state[f"audio_0"] = generate_tts(msg)
+            st.audio(st.session_state[f"audio_0"], format="audio/mp3")
+
+
 
