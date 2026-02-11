@@ -5,7 +5,7 @@ import hmac
 from google.cloud import texttospeech
 from google.oauth2 import service_account
 
-# add the streaming capabilities
+
 
 @st.cache_resource
 def get_tts_client():
