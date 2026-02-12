@@ -6,3 +6,4 @@ pandas
 transformers
 torch
 runpod
+google-cloud-texttospeech

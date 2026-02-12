@@ -134,14 +134,16 @@ for message in st.session_state.messages:
 
     if message["role"] == "assistant":
         avatar = f"{message['avatar']}"
-
     with st.chat_message(message["role"], avatar=avatar):
-        col1, col2 = st.columns([7, 2])
-        with col1:
-            st.markdown(message["content"])
-        with col2:
-            st.session_state[f"audio_0"] = generate_tts(message["content"])
-            st.audio(st.session_state[f"audio_0"], format="audio/mp3")
+        st.markdown(message["content"])
+
+    # with st.chat_message(message["role"], avatar=avatar):
+    #     col1, col2 = st.columns([7, 2])
+    #     with col1:
+    #         st.markdown(message["content"])
+    #     with col2:
+    #         st.session_state[f"audio_0"] = generate_tts(message["content"])
+    #         st.audio(st.session_state[f"audio_0"], format="audio/mp3")
 
 
 
@@ -157,7 +159,7 @@ if question := st.chat_input():
     # Display user message in chat
     st.chat_message("user").write(question)
     # Send API request and process the streaming response
-    response, sim = requests.post('https://api.runpod.ai/v2/38z94rrm7q5n9c/runsync', stream=True, json=data, headers=headers)
+    response = requests.post('https://api.runpod.ai/v2/38z94rrm7q5n9c/runsync', stream=True, json=data, headers=headers)
     msg = response
     for line in response.iter_lines():
         # Filter out keep-alive newlines
@@ -165,18 +167,19 @@ if question := st.chat_input():
             decoded_line = line.decode('utf-8')
 
     # Extract the assistant's response from the API response and update session state
-    msg = json.loads(decoded_line)['output']
-    msg = f"{msg} {str(sim)}"
+    msg = json.loads(decoded_line)['output'][0]
+    #msg = f"{msg} {str(json.loads(decoded_line)['output'][1])}"
     st.session_state.messages.append({"role": "assistant", "content": msg, "avatar": f"{phil}.jpg"})
     # Display the assistant's response in chat
 
     with st.chat_message("assistant", avatar=f"{phil}.jpg"):
-        col1, col2 = st.columns([7, 2])
-        with col1:
-            st.markdown(msg)
-        with col2:
-            st.session_state[f"audio_0"] = generate_tts(msg)
-            st.audio(st.session_state[f"audio_0"], format="audio/mp3")
+        st.markdown(msg)
+        # col1, col2 = st.columns([7, 2])
+        # with col1:
+        #     st.markdown(msg)
+        # with col2:
+        #     st.session_state[f"audio_0"] = generate_tts(msg)
+        #     st.audio(st.session_state[f"audio_0"], format="audio/mp3")
 
 
 
