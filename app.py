@@ -2,39 +2,39 @@ import requests
 import streamlit as st
 import json
 import hmac
-from google.cloud import texttospeech
-from google.oauth2 import service_account
+#from google.cloud import texttospeech
+#from google.oauth2 import service_account
 
 
 
-@st.cache_resource
-def get_tts_client():
-    credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"]
-    )
-    return texttospeech.TextToSpeechClient(credentials=credentials)
-
-client = get_tts_client()
-
-def generate_tts(text):
-    synthesis_input = texttospeech.SynthesisInput(text=text)
-
-    voice = texttospeech.VoiceSelectionParams(
-        language_code="en-US",
-        name="en-US-Neural2-J"
-    )
-
-    audio_config = texttospeech.AudioConfig(
-        audio_encoding=texttospeech.AudioEncoding.MP3
-    )
-
-    response = client.synthesize_speech(
-        input=synthesis_input,
-        voice=voice,
-        audio_config=audio_config
-    )
-
-    return response.audio_content
+# @st.cache_resource
+# def get_tts_client():
+#     credentials = service_account.Credentials.from_service_account_info(
+#         st.secrets["gcp_service_account"]
+#     )
+#     return texttospeech.TextToSpeechClient(credentials=credentials)
+#
+# client = get_tts_client()
+#
+# def generate_tts(text):
+#     synthesis_input = texttospeech.SynthesisInput(text=text)
+#
+#     voice = texttospeech.VoiceSelectionParams(
+#         language_code="en-US",
+#         name="en-US-Neural2-J"
+#     )
+#
+#     audio_config = texttospeech.AudioConfig(
+#         audio_encoding=texttospeech.AudioEncoding.MP3
+#     )
+#
+#     response = client.synthesize_speech(
+#         input=synthesis_input,
+#         voice=voice,
+#         audio_config=audio_config
+#     )
+#
+#     return response.audio_content
 
 def on_sidebar_change():
     config = (
