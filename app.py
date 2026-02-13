@@ -2,6 +2,7 @@ import requests
 import streamlit as st
 import json
 import hmac
+import os
 #from google.cloud import texttospeech
 #from google.oauth2 import service_account
 
@@ -80,7 +81,7 @@ def check_password():
     if st.button("Login"):
         if hmac.compare_digest(
             password,
-            st.secrets["APP_PASSWORD"]
+            os.environ.get("APP_PASSWORD")#st.secrets["APP_PASSWORD"]
         ):
             st.session_state.authenticated = True
             st.rerun()
@@ -103,7 +104,7 @@ if len(st.session_state.messages) >= MAX_MESSAGES:
 
 headers = {
     'Content-Type': 'application/json',
-    'Authorization': f'Bearer {st.secrets["RUNPOD_API_KEY"]}'
+    'Authorization': f'Bearer {os.environ.get("RUNPOD_API_KEY")}'
 }
 
 st.title("Ask a Philosopher")
