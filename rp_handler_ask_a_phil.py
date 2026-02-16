@@ -8,8 +8,8 @@ import transformers
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-hf_token = os.environ['HF_TOKEN']
-login(token=hf_token)
+#hf_token = os.environ['hf_token']
+#login(token=hf_token)
 
 LLM_MODEL_ID = "meta-llama/Llama-3.2-3B-Instruct"
 
@@ -32,7 +32,7 @@ print("✅ Model loaded and ready.")
 def process_input_llm(question, prompt):
     prompt = prompt + " Keep your response very short."
     llm_res = single_query_response(question, model = model, tokenizer = tokenizer, prompt = prompt)
-    res = llm_res['content']
+    res = llm_res#['content']
     return res
 
 def process_input_rag(question, prompt, corpus):
@@ -41,7 +41,7 @@ def process_input_rag(question, prompt, corpus):
     prompt = prompt + "\n\nKeep your response very short."
     llm_res = single_query_response(question, model = model, tokenizer = tokenizer, prompt = prompt)
     res = info
-    res += llm_res['content']
+    res += llm_res
     return res, sim
 
 
