@@ -4,15 +4,34 @@ import runpod
 from huggingface_hub import login
 import os
 import streamlit as st
+import transformers
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 
 hf_token = os.environ['HF_TOKEN']
 login(token=hf_token)
+
+LLM_MODEL_ID = "meta-llama/Llama-3.2-3B-Instruct"
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL_ID)
+
+model = AutoModelForCausalLM.from_pretrained(
+    LLM_MODEL_ID
+)
+model.to(device)
+
+model.eval()
+
+print("✅ Model loaded and ready.")
+
 
 #prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
 
 def process_input_llm(question, prompt):
     prompt = prompt + " Keep your response very short."
-    llm_res = single_query_response(question, prompt = prompt)
+    llm_res = single_query_response(question, model = model, tokenizer = tokenizer, prompt = prompt)
     res = llm_res['content']
     return res
 
@@ -20,7 +39,7 @@ def process_input_rag(question, prompt, corpus):
     doc, info, sim = ir_single_query_top_doc(question, use_bert=False, corpus_json=corpus)
     prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
     prompt = prompt + "\n\nKeep your response very short."
-    llm_res = single_query_response(question, prompt = prompt)
+    llm_res = single_query_response(question, model = model, tokenizer = tokenizer, prompt = prompt)
     res = info
     res += llm_res['content']
     return res, sim

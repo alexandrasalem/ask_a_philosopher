@@ -1,28 +1,50 @@
 import transformers
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import pandas as pd
 from ir import ir_single_query_top_doc
 
-LLM_MODEL_ID = "meta-llama/Llama-3.2-3B-Instruct"
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-def single_query_response(question, prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."):
-    pipe = transformers.pipeline(
-        "text-generation",
-        model=LLM_MODEL_ID,
-        torch_dtype=torch.bfloat16,
-        device=device,
-    )
+def single_query_response(question, model, tokenizer, prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would."):
     messages = [
         {"role": "system", "content": prompt},
         {"role": "user", "content": question},
     ]
-    outputs = pipe(
+
+    input_ids = tokenizer.apply_chat_template(
         messages,
-        max_new_tokens = 512
+        add_generation_prompt=True,
+        return_tensors="pt"
     )
-    text_output = outputs[0]["generated_text"][-1]
+
+    input_ids = input_ids.to(model.device)
+
+    with torch.no_grad():
+        outputs = model.generate(
+            **input_ids,
+            max_new_tokens=512,
+            do_sample=True,
+        )
+
+    text_output = tokenizer.decode(
+    outputs[0][input_ids["input_ids"].shape[-1]:],
+    skip_special_tokens=True
+)
+    # pipe = transformers.pipeline(
+    #     "text-generation",
+    #     model=LLM_MODEL_ID,
+    #     torch_dtype=torch.bfloat16,
+    #     device=device,
+    # )
+    # messages = [
+    #     {"role": "system", "content": prompt},
+    #     {"role": "user", "content": question},
+    # ]
+    # outputs = pipe(
+    #     messages,
+    #     max_new_tokens = 512
+    # )
+    # text_output = outputs[0]["generated_text"][-1]
     return text_output
 
 def multiple_query_responses(question_csv, output_filename, ir = True, prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Answer with 3-5 sentences at most."):
@@ -56,3 +78,5 @@ def multiple_query_responses(question_csv, output_filename, ir = True, prompt = 
     questions['llm_response'] = responses
     questions['llm_prompt'] = prompts
     return questions
+
+print(single_query_response("What is the meaning of life?"))
