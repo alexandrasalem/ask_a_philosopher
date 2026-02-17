@@ -3,7 +3,7 @@ numpy
 requests
 streamlit
 pandas
-#transformers
+transformers
 #torch
-#runpod
+runpod
 google-cloud-texttospeech
