@@ -4,6 +4,6 @@ requests
 streamlit
 pandas
 transformers
-#torch
+torch
 runpod
 google-cloud-texttospeech
