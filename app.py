@@ -3,13 +3,6 @@ import streamlit as st
 import json
 import hmac
 import os
-from rp_handler_ask_a_phil import handler
-from huggingface_hub import login
-#from google.cloud import texttospeech
-#from google.oauth2 import service_account
-
-#hf_token = os.environ['hf_token']
-#login(token=hf_token)
 
 
 # @st.cache_resource
