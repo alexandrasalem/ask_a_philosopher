@@ -3,9 +3,13 @@ import streamlit as st
 import json
 import hmac
 import os
+from rp_handler_ask_a_phil import handler
+from huggingface_hub import login
 #from google.cloud import texttospeech
 #from google.oauth2 import service_account
 
+#hf_token = os.environ['hf_token']
+#login(token=hf_token)
 
 
 # @st.cache_resource
@@ -160,8 +164,9 @@ if question := st.chat_input():
     # Display user message in chat
     st.chat_message("user").write(question)
     # Send API request and process the streaming response
+    #response = handler(data)
     response = requests.post('https://api.runpod.ai/v2/38z94rrm7q5n9c/runsync', stream=True, json=data, headers=headers)
-    msg = response
+    #msg, sim = response['output']
     for line in response.iter_lines():
         # Filter out keep-alive newlines
         if line:
