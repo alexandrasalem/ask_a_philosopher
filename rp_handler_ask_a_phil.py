@@ -26,7 +26,8 @@ X_confucius = np.delete(X_confucius, 0, axis=1)
 tokenizer_embeddings = AutoTokenizer.from_pretrained(BERT_MODEL)
 model_embeddings = AutoModel.from_pretrained(BERT_MODEL)
 
-SIM_THRESHOLD = 0.65
+SIM_THRESHOLD_ARISTOTLE = 0.65
+SIM_THRESHOLD_CONFUCIUS = 0.50
 print("✅ Embeddings loaded and ready.")
 
 #prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
@@ -51,14 +52,18 @@ def process_input_rag(question, prompt, corpus):
     res += llm_res
     return res, sim
 
-def process_input_combo(question, prompt, corpus_embeddings, corpus_json):
+def process_input_combo(question, prompt, corpus_embeddings, corpus_json, philosopher):
     doc, info, sim = ir_single_query_top_doc(question,
                                              model_embeddings,
                                              tokenizer_embeddings,
                                              corpus_embeddings= corpus_embeddings,
                                              corpus_json=corpus_json)
+    if philosopher == "Aristotle":
+        SIM_THRESHOLD = SIM_THRESHOLD_ARISTOTLE
+    else:
+        SIM_THRESHOLD = SIM_THRESHOLD_CONFUCIUS
     if sim > SIM_THRESHOLD:
-        prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
+        prompt = f"{prompt} Consider this relevant chapter from {philosopher}'s work when crafting your response: {doc}"
         prompt = prompt + "\n\nKeep your response very short, 2-3 sentences."
         llm_res = single_query_response(question, model = model, tokenizer = tokenizer, prompt = prompt)
         res = info
@@ -94,9 +99,9 @@ def handler(event):
 
     if philosopher == "Aristotle":
         #question, prompt, corpus_embeddings, corpus_json
-        res, sim = process_input_combo(question, prompt, X_aristotle, 'aristotle.json')
+        res, sim = process_input_combo(question, prompt, X_aristotle, 'aristotle.json', philosopher)
     else:
-        res, sim = process_input_combo(question, prompt, X_confucius, 'confucius.json')
+        res, sim = process_input_combo(question, prompt, X_confucius, 'confucius.json', philosopher)
 
     # if mode == "LLM-only":
     #     res = process_input_llm(question = question, prompt = prompt)
