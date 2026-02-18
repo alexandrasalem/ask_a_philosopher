@@ -85,7 +85,7 @@ def handler(event):
 
     question = input.get('question')
     philosopher = input.get('philosopher')
-    mode = input.get('mode')
+    #mode = input.get('mode')
     prompt = f"You are the ancient philosopher, {philosopher}. Respond to this question as {philosopher} would."
     #seconds = input.get('seconds', 0)
 
