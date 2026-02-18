@@ -59,12 +59,12 @@ def process_input_combo(question, prompt, corpus_embeddings, corpus_json):
                                              corpus_json=corpus_json)
     if sim > SIM_THRESHOLD:
         prompt = f"{prompt} Consider this relevant chapter from Aristotle's work when crafting your response: {doc}"
-        prompt = prompt + "\n\nKeep your response very short."
+        prompt = prompt + "\n\nKeep your response very short, 2-3 sentences."
         llm_res = single_query_response(question, model = model, tokenizer = tokenizer, prompt = prompt)
         res = info
         res += llm_res
     else:
-        prompt = prompt + " Keep your response very short."
+        prompt = prompt + "\n\nKeep your response very short, 2-3 sentences."
         llm_res = single_query_response(question, model=model, tokenizer=tokenizer, prompt=prompt)
         res = llm_res  # ['content']
     return res, sim
