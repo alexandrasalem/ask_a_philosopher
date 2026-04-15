@@ -45,12 +45,12 @@ def ir_single_query_top_doc(question, embeddings_model, embeddings_tokenizer, co
         if res_data['chapter_label'] == None:
             chapter_info += f'{res_data["text_name"]}'
         else:
-            chapter_info += f'{res_data["text_name"]}, {res_data["chapter_label"]}'
+            chapter_info += f'{res_data["text_name"]} {res_data["chapter_label"]}'
     else:
         if res_data['chapter_label'] == None:
-            chapter_info += f'{res_data["text_name"]}, {res_data["book_label"]}'
+            chapter_info += f'{res_data["text_name"]} {res_data["book_label"]}'
         else:
-            chapter_info += f'{res_data["text_name"]}, {res_data["book_label"]}, {res_data["chapter_label"]}'
+            chapter_info += f'{res_data["text_name"]} {res_data["book_label"]} {res_data["chapter_label"]}'
     chapter_info = chapter_info + "\n\n"
 
     return res_data["chapter_text"], chapter_info, sim
