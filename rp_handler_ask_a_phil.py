@@ -26,8 +26,8 @@ X_confucius = np.delete(X_confucius, 0, axis=1)
 tokenizer_embeddings = AutoTokenizer.from_pretrained(BERT_MODEL)
 model_embeddings = AutoModel.from_pretrained(BERT_MODEL)
 
-SIM_THRESHOLD_ARISTOTLE = 1#0.65
-SIM_THRESHOLD_CONFUCIUS = 1#0.50
+SIM_THRESHOLD_ARISTOTLE = 0.65
+SIM_THRESHOLD_CONFUCIUS = 0.50
 print("✅ Embeddings loaded and ready.")
 
 #prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
