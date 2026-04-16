@@ -1,25 +1,33 @@
-This is the code for developing the **Ask a Philosopher** chatbot. 
-We started with building one based upon the text of Aristotle.
-This project uses retrieval-augmented generation (RAG) for answering questions, based up recommendations from Jurafsky \& Martin's book, *Speech and Language Processing*, 3rd edition (https://web.stanford.edu/~jurafsky/slp3/14.pdf).
+# Ask a Philosopher
 
-In RAG, first a relevant document to the query is identified using standard Information Retrieval (IR) techniques. Then, a generative LLM generates an answer given the query and retrieved document.
+### Description
+This is the code repository for building our *Ask a Philosopher* chatbot for chatting with either AI-Aristotle or AI-Confucius.
+The chatbot uses Retrieval-Augmented Generation (RAG) to answer user queries. 
+For *retrieval*, we use Octen-Embedding-0.6B, a text embedding model for dense embeddings, for finding the closest philosophical texts to the queries to use as reference.
+For *generation*, we use Llama-3.2-3B-Instruct, an open-source, instruction-tuned LLM from Meta.
+We only use the retrieved references when the cosine similarity beats a specified threshold for each philosopher.
+Both retrieval and generation steps are run through a serverless RunPod instance for GPU usage.
 
-We use Python 3.11.9. Install requirements using `pip install -r requirements.txt`.
+### RunPod set-up
+The RunPod code is set up with `Dockerfile` including the following:
+* `llm.py`:  LLM generation of responses
+* `ir_light.py`: IR setup with octen
+* `rp_handler_ask_a_phil.py`:  runpod handler file
+* `requirements.txt`:  required install for runpod
+* `aristotle.json`: complied aristotle chapters 
+* `confucius.json`: compiled confucius chapters 
+* `aristotle_octen_small.csv`:  pre-computed embeddings for aristotle chapters
+* `confucius_octen_small.csv`:  pre-computed embeddings for confucius chapters
 
-Details on our code thus far (WIP):
+### Other files
+Other files:
+* `pull_data.py`: script for pulling down the chapters
+* `making_json.py`: script for creating the json file
+* `create_bert_files.py`: script for pre-computing the embeddings
 
-We pulled down the Aristotle chapters with `pull_data.py`.
-
-Then we made the json file with `making_json.py`.
-
-Tools for the basic IR are in `ir.py`.
-
-The script `version_1_basic_ir.py` generates the closest document to the query and returns that document as a string.
-
-The script `version_1_basic_ir_cos_sims.py` pulls cosine similarity values between the query and each of the documents, and returns this as a list of dictionaries.
-
-The script `version_1_basic_ir_multiple_questions.py` generates the closest documents to a collection of queries and returns those as a string.
-
-The script `version_1_basic_ir_user_input.py` generates the closest document to a query provided by the user in streamlit and returns that document as a string.
-
-Each of the scripts above uses a basic IR system with tf-idf. Variations of each of these scripts for version 2 which uses BERT instead of tf-idf for the IR are now available (`version_2_bert_ir.py`, etc). First, run `python create_bert_files.py`. Then run those scripts.
+### Deployed Streamlit app
+The repository for the deployed application is here: https://github.com/alexandrasalem/ask_a_philosopher_streamlit. 
+The app is deployed through Render, using Streamlit for the infrastructure.
+It also incorporates one of Google's English neural Text-to-Speech systems for the philosopher responses.
+The chatbot is deployed at this url: https://ask-a-philosopher.onrender.com/ 
+A password is required. 
