@@ -13,7 +13,7 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 model.to(device)
 model.eval()
-print("✅ Model loaded and ready.")
+print("Model loaded and ready.")
 
 BERT_MODEL = "Octen/Octen-Embedding-0.6B"
 ARISTOTLE_EMBEDDINGS =  "aristotle_octen_small.csv"
@@ -28,7 +28,7 @@ model_embeddings = AutoModel.from_pretrained(BERT_MODEL)
 
 SIM_THRESHOLD_ARISTOTLE = 0.63
 SIM_THRESHOLD_CONFUCIUS = 0.50
-print("✅ Embeddings loaded and ready.")
+print("Embeddings loaded and ready.")
 
 #prompt = "You are the ancient philosopher, Aristotle. Respond to this question as Aristotle would. Keep your response very short."
 

@@ -31,3 +31,6 @@ The app is deployed through Render, using Streamlit for the infrastructure.
 It also incorporates one of Google's English neural Text-to-Speech systems for the philosopher responses.
 The chatbot is deployed at this url: https://ask-a-philosopher.onrender.com/ 
 A password is required. 
+
+### Project Report
+More information about this project including a detailed Technical Report and video demo are located at this url: https://alexandrasalem.com/talk/conversations-across-time-chatting-with-ancient-philosophers/
